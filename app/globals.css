@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────
+   Design tokens — PRD §11.2
+   Dark is the default. Light is opt-in via [data-theme="light"].
+   Hierarchy comes from spacing and type weight, not from boxing
+   everything in identical cards.
+   ────────────────────────────────────────────────────────────── */
+
+:root {
+  --surface: #0f1115;
+  --raised: #171a20;
+  --line: #262b34;
+  --text: #e8eaed;
+  --muted: #8a929e;
+  --accent: #4f7cff;
+  --positive: #3fbf8f;
+  --warn: #e0a030;
+  --danger: #e05a5a;
+
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --positive-soft: color-mix(in oklab, var(--positive) 14%, transparent);
+  --warn-soft: color-mix(in oklab, var(--warn) 14%, transparent);
+  --danger-soft: color-mix(in oklab, var(--danger) 14%, transparent);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --surface: #fbfbfc;
+  --raised: #ffffff;
+  --line: #e3e5ea;
+  --text: #14171c;
+  --muted: #666e7a;
+  --accent: #3563e9;
+  --positive: #1f9d72;
+  --warn: #b57616;
+  --danger: #c33f3f;
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Type scale — PRD §11.2: 14 / 16 / 20 / 28 / 40 */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+}
+
+html,
+body {
+  background: var(--surface);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Scrollbars stay quiet — the interview screen must not look busy. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
