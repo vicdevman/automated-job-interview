@@ -35,7 +35,7 @@ export default async function RolesPage() {
 
   return (
     <>
-      <h1 className="text-[1.75rem] font-semibold tracking-tight">Roles</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Roles</h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
         A role is what questions are generated from. The description and competencies go directly
         into the prompt, so specific wording here produces better questions than generic wording.

@@ -76,7 +76,7 @@ export function InterviewScreen(props: {
           : 'idle';
 
   return (
-    <div className="-mx-6 -my-10 flex min-h-[calc(100dvh-57px)] flex-col">
+    <div className="-mx-4 -my-8 flex min-h-[calc(100dvh-53px)] flex-col sm:-mx-6 sm:-my-10 sm:min-h-[calc(100dvh-57px)]">
       {/* ── thin status rail ──────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 border-0 border-line px-6 py-3 pb-0">
         <TurnIndicator state={interview.state} level={interview.micLevel} />
@@ -90,17 +90,17 @@ export function InterviewScreen(props: {
             {interview.voiceStatus === 'unavailable' ? 'mic unavailable' : 'mic connecting…'}
           </span>
         )}
-        <span className="hidden text-sm text-muted sm:inline">
+        <span className="hidden truncate text-sm text-muted md:inline">
           {props.roleTitle} · {props.level}
         </span>
-        <span className="ml-auto text-sm tabular-nums text-muted">
-          Q{position} of {props.questionCount}
+        <span className="ml-auto shrink-0 text-sm tabular-nums text-muted">
+          Q{position}/{props.questionCount}
         </span>
         <button
           type="button"
           onClick={() => setConfirmExit(true)}
           aria-label="End the interview"
-          className="grid size-8 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-text"
+          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-text"
         >
           <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
@@ -109,7 +109,7 @@ export function InterviewScreen(props: {
       </div>
 
       {/* ── progress rail ─────────────────────────────────────────────────── */}
-      <div className="flex gap-1 px-6 pt-3" aria-hidden="true">
+      <div className="flex gap-1 px-4 pt-3 sm:px-6" aria-hidden="true">
         {Array.from({ length: props.questionCount }).map((_, i) => (
           <span
             key={i}
@@ -122,7 +122,7 @@ export function InterviewScreen(props: {
       </div>
 
       {/* ── the interview ─────────────────────────────────────────────────── */}
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-8 px-6 py-10">
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-6 px-4 py-8 sm:gap-8 sm:px-6 sm:py-10">
         <InterviewerAvatar
           state={avatarState}
           amplitude={interview.amplitude}
@@ -132,7 +132,7 @@ export function InterviewScreen(props: {
         {/* The question is rendered the moment it is known, before audio
             starts — the candidate can read and start thinking while the voice
             loads. */}
-        <h1 className="max-w-xl text-center text-xl leading-snug sm:text-[1.75rem]">
+        <h1 className="max-w-xl text-balance text-center text-lg leading-snug sm:text-xl md:text-[1.75rem]">
           {interview.question.text}
         </h1>
 
@@ -219,7 +219,7 @@ export function InterviewScreen(props: {
       </main>
 
       {/* ── one control ───────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-center gap-5 border-t border-line px-6 py-5">
+      <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 border-t border-line px-4 py-4 sm:px-6 sm:py-5">
         {!typing && (
           <MicButton
             state={interview.state}
@@ -248,14 +248,14 @@ export function InterviewScreen(props: {
       {/* ── exit confirmation ─────────────────────────────────────────────── */}
       {confirmExit && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-surface/80 p-6 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-xl border border-line bg-raised p-6">
+          <div className="w-full max-w-sm rounded-xl border border-line bg-raised p-5 sm:p-6">
             <h2 className="text-lg font-medium">End the interview?</h2>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               The {answered} answer{answered === 1 ? '' : 's'} you have given
               {answered === 1 ? ' is' : ' are'} already saved, and you will still get a report for
               them.
             </p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <Button variant="danger" loading={finishing} onClick={() => void finish(true)}>
                 End and see results
               </Button>

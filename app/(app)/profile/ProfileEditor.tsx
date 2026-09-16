@@ -127,7 +127,7 @@ export function ProfileEditor({
   }
 
   return (
-    <div className="mt-10 flex flex-col gap-12">
+    <div className="mt-8 flex flex-col gap-10 sm:mt-10 sm:gap-12">
       {/* ── inputs ──────────────────────────────────────────────────────── */}
       <section>
         <h2 className="text-lg font-medium">Add something about yourself</h2>
@@ -356,7 +356,7 @@ function FactRow({
         </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+      <div className="flex shrink-0 items-center gap-1 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100">
         {!editing && (
           <Button size="sm" variant="ghost" onClick={() => setEditing(true)}>
             Edit

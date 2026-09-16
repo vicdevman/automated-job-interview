@@ -47,13 +47,13 @@ export default async function InterviewerSessionsPage() {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[1.75rem] font-semibold tracking-tight">Sessions</h1>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Sessions</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
             Candidates are shown by pseudonym. Names, emails and CV content are never rendered here
             unless you explicitly reveal a single session, which is recorded in the audit log.
           </p>
         </div>
-        <dl className="flex gap-8">
+        <dl className="flex gap-6 sm:gap-8">
           <Stat label="Sessions" value={rows.length} />
           <Stat label="Completed" value={completed.length} />
           <Stat label="Mean score" value={meanScore ?? '—'} />

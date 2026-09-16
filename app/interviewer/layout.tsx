@@ -20,15 +20,15 @@ export default async function InterviewerLayout({ children }: { children: React.
   return (
     <Providers>
       <div className="flex min-h-dvh flex-col">
-        <header className="border-b border-line">
-          <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-3.5">
+        <header className="relative border-b border-line">
+          <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
             <Link href="/interviewer/sessions" className="text-sm font-semibold tracking-tight">
               Interviewer console
             </Link>
             <InterviewerNav />
           </div>
         </header>
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-10">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
       </div>
     </Providers>
   );

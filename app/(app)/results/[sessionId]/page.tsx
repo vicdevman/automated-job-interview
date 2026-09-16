@@ -62,12 +62,12 @@ export default async function ResultsPage({
               year: 'numeric',
             })}
           </p>
-          <h1 className="mt-2 text-[1.75rem] font-semibold tracking-tight">How it went</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight sm:text-[1.75rem]">How it went</h1>
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex w-full items-center justify-between gap-4 sm:w-auto sm:justify-start sm:gap-6">
           <div className="text-right">
-            <p className="text-[2.5rem] font-semibold leading-none tabular-nums">
+            <p className="text-[2rem] font-semibold leading-none tabular-nums sm:text-[2.5rem]">
               {Math.round(score)}
             </p>
             <p className="mt-1 text-xs text-muted">out of 100</p>
@@ -83,11 +83,11 @@ export default async function ResultsPage({
 
       {/* ── summary ──────────────────────────────────────────────────────── */}
       {interview.summary && (
-        <p className="mt-8 max-w-3xl text-lg leading-relaxed">{interview.summary}</p>
+        <p className="mt-8 max-w-3xl leading-relaxed sm:text-lg">{interview.summary}</p>
       )}
 
       {/* ── breakdown ────────────────────────────────────────────────────── */}
-      <section className="mt-12 grid gap-10 border-t border-line pt-10 lg:grid-cols-[1fr_1.1fr]">
+      <section className="mt-10 grid gap-10 border-t border-line pt-10 sm:mt-12 lg:grid-cols-[1fr_1.1fr]">
         <div>
           <h2 className="text-lg font-medium">Where the marks came from</h2>
           <p className="mt-1 text-sm leading-relaxed text-muted">
@@ -161,7 +161,7 @@ export default async function ResultsPage({
         <ul className="mt-6 flex flex-col divide-y divide-line border-t border-line">
           {turns.map((turn) => (
             <li key={turn.id} className="py-6">
-              <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start justify-between gap-4 sm:gap-6">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-xs tabular-nums text-muted">Q{turn.index + 1}</span>
@@ -214,7 +214,7 @@ export default async function ResultsPage({
         )}
       </section>
 
-      <div className="mt-12 flex gap-3 border-t border-line pt-8">
+      <div className="mt-12 flex flex-wrap gap-3 border-t border-line pt-8">
         <Link
           href="/setup"
           className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-medium text-white transition-[filter] hover:brightness-110"

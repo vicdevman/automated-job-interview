@@ -36,14 +36,14 @@ export default async function AccountPage() {
 
   return (
     <>
-      <h1 className="text-[1.75rem] font-semibold tracking-tight">Your data</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Your data</h1>
       <p className="mt-2 max-w-2xl leading-relaxed text-muted">
         Everything this system holds about you, and what you can do with it.
       </p>
 
       <section className="mt-10">
         <h2 className="text-lg font-medium">What is stored</h2>
-        <dl className="mt-4 flex flex-wrap gap-10">
+        <dl className="mt-4 flex flex-wrap gap-x-10 gap-y-4">
           <Count label="Documents and links" value={counts.documents} />
           <Count label="Extracted facts" value={counts.facts} />
           <Count label="Interviews" value={counts.sessions} />

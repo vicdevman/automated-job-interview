@@ -22,7 +22,12 @@ export interface InterviewerAvatarProps {
   amplitude: number;
   /** Any stable string. Derives the face so one interview looks consistent. */
   seed: string;
-  size?: number;
+  /**
+   * Tailwind sizing for the wrapper. The SVG fills it, so the rig scales
+   * cleanly rather than being pinned to a pixel size that dominates a phone
+   * screen while looking small on a desktop.
+   */
+  className?: string;
 }
 
 /** Deterministic hash → the face is stable for a given session. */
@@ -43,7 +48,7 @@ export function InterviewerAvatar({
   state,
   amplitude,
   seed,
-  size = 168,
+  className = 'size-28 sm:size-36 md:size-40',
 }: InterviewerAvatarProps) {
   const reduceMotion = useReducedMotion();
 
@@ -122,7 +127,7 @@ export function InterviewerAvatar({
 
   return (
     <div
-      style={{ width: size, height: size }}
+      className={className}
       role="img"
       aria-label={
         state === 'speaking'
@@ -136,8 +141,8 @@ export function InterviewerAvatar({
     >
       <motion.svg
         viewBox="0 0 120 120"
-        width={size}
-        height={size}
+        width="100%"
+        height="100%"
         // Idle sway: ±2px over 4s, dropped under reduced motion.
         animate={
           reduceMotion

@@ -13,15 +13,15 @@ export const metadata: Metadata = { title: 'Privacy' };
 export default function PrivacyPage() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-6 py-5">
+      <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
         <Link href="/" className="text-sm font-semibold tracking-tight">
           Interview Simulator
         </Link>
         <ThemeToggle />
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-6 py-10">
-        <h1 className="text-[1.75rem] font-semibold tracking-tight">Privacy</h1>
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Privacy</h1>
         <p className="mt-3 leading-relaxed text-muted">
           This states plainly what this system does with your information. It is written to comply
           with the Nigeria Data Protection Act 2023 and with GDPR principles.
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
         </Section>
       </main>
 
-      <footer className="mx-auto w-full max-w-3xl px-6 py-8 text-xs text-muted">
+      <footer className="mx-auto w-full max-w-3xl px-4 py-8 text-xs text-muted sm:px-6">
         This is a final-year academic project, not a commercial service.
       </footer>
     </div>

@@ -172,7 +172,7 @@ export function RoleManager({ initialRoles }: { initialRoles: RoleRow[] }) {
       <ul className="mt-8 divide-y divide-line border-t border-line">
         {initialRoles.map((role) => (
           <li key={role.id} className="group py-5">
-            <div className="flex items-start justify-between gap-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-medium">{role.title}</h3>
@@ -191,7 +191,7 @@ export function RoleManager({ initialRoles }: { initialRoles: RoleRow[] }) {
                 </p>
               </div>
 
-              <div className="flex shrink-0 gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+              <div className="flex shrink-0 flex-wrap justify-end gap-1 transition-opacity focus-within:opacity-100 md:opacity-0 md:group-hover:opacity-100">
                 <Button
                   size="sm"
                   variant="ghost"

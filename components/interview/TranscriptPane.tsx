@@ -28,7 +28,7 @@ export function TranscriptPane({
 
   return (
     <div
-      className="max-h-52 overflow-y-auto rounded-xl border border-line bg-raised px-5 py-4"
+      className="max-h-36 overflow-y-auto rounded-xl border border-line bg-raised px-4 py-3.5 sm:max-h-52 sm:px-5 sm:py-4"
       aria-live="polite"
       aria-atomic="false"
       aria-label="Your answer as we hear it"
@@ -36,7 +36,7 @@ export function TranscriptPane({
       {empty ? (
         <p className="text-sm text-muted">{placeholder}</p>
       ) : (
-        <p className="text-base leading-relaxed">
+        <p className="text-sm leading-relaxed sm:text-base">
           <span>{finals.join(' ')}</span>
           {partial && <span className="text-muted"> {partial}</span>}
           <span

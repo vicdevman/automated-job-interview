@@ -30,7 +30,7 @@ export default async function DashboardPage() {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-[1.75rem] font-semibold tracking-tight">
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">
             {greeting()}, {session?.user?.name?.split(' ')[0] ?? 'there'}
           </h1>
           <p className="mt-2 text-muted">Practice interviews you have run, most recent first.</p>

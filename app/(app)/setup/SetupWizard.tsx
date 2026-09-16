@@ -78,7 +78,7 @@ export function SetupWizard({
   }
 
   return (
-    <div className="mt-10 flex flex-col gap-12">
+    <div className="mt-8 flex flex-col gap-10 sm:mt-10 sm:gap-12">
       {/* 1 — role */}
       <Step n={1} title="Which role are you practising for?">
         <div className="grid gap-3 sm:grid-cols-2">
@@ -333,7 +333,7 @@ function MicTest() {
         </Button>
 
         <div className="flex items-center gap-2">
-          <div className="h-1.5 w-40 overflow-hidden rounded-full bg-line">
+          <div className="h-1.5 w-28 overflow-hidden rounded-full bg-line sm:w-40">
             <div
               className="h-full rounded-full bg-accent transition-[width] duration-75"
               style={{ width: `${Math.min(100, level * 400)}%` }}

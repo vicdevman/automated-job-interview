@@ -31,7 +31,7 @@ export interface RadarDatum {
 export function ScoreRadar({ data }: { data: RadarDatum[] }) {
   return (
     <figure className="mt-6">
-      <div className="h-72 w-full" aria-hidden="true">
+      <div className="h-60 w-full sm:h-72" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} outerRadius="72%">
             <PolarGrid stroke="var(--line)" strokeWidth={1} />

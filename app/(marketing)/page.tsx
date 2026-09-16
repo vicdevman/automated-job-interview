@@ -8,36 +8,36 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle';
 export default function LandingPage() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-5">
-        <span className="flex items-center gap-2.5 text-sm font-semibold tracking-tight">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
+        <span className="flex min-w-0 items-center gap-2.5 text-sm font-semibold tracking-tight">
           <Logo />
-          Interview Simulator
+          <span className="truncate">Interview Simulator</span>
         </span>
-        <nav className="flex items-center gap-1">
+        <nav className="flex shrink-0 items-center gap-1">
           <ThemeToggle />
           <Link
             href="/login"
-            className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:text-text"
+            className="rounded-lg px-2 py-2 text-sm font-medium text-muted transition-colors hover:text-text sm:px-3"
           >
             Sign in
           </Link>
           <Link
             href="/register"
-            className="rounded-lg bg-accent px-3.5 py-2 text-sm font-medium text-white transition-[filter] hover:brightness-110"
+            className="whitespace-nowrap rounded-lg bg-accent px-3 py-2 text-sm font-medium text-white transition-[filter] hover:brightness-110 sm:px-3.5"
           >
             Get started
           </Link>
         </nav>
       </header>
 
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-16">
+      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-4 py-12 sm:px-6 sm:py-16">
         <p className="mb-5 text-sm font-medium text-accent">Practise out loud, not on paper</p>
 
-        <h1 className="max-w-3xl text-[2.5rem] font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+        <h1 className="max-w-3xl text-balance text-[2rem] font-semibold leading-[1.1] tracking-tight sm:text-[2.5rem] md:text-5xl">
           A mock interview that has actually read your CV.
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:mt-6 sm:text-lg">
           Upload your CV, pick a role, and hold a real spoken conversation with an interviewer that
           asks about the work you have genuinely done. It listens while you answer, adapts the next
           question to what you just said, and hands back a breakdown of how you performed.
@@ -58,7 +58,7 @@ export default function LandingPage() {
           </Link>
         </div>
 
-        <ul className="mt-20 grid gap-10 border-t border-line pt-10 sm:grid-cols-3">
+        <ul className="mt-14 grid gap-8 border-t border-line pt-10 sm:mt-20 sm:gap-10 sm:grid-cols-3">
           <Claim title="Grounded in evidence">
             Every personalised question traces back to a verbatim line in your CV. Nothing is
             invented — if it was not in your documents, you will not be asked about it.
@@ -74,7 +74,7 @@ export default function LandingPage() {
         </ul>
       </main>
 
-      <footer className="mx-auto w-full max-w-5xl px-6 py-8 text-xs text-muted">
+      <footer className="mx-auto w-full max-w-5xl px-4 py-8 text-xs text-muted sm:px-6">
         Built for final-year project defence · Data handled under NDPA 2023 and GDPR principles
       </footer>
     </div>

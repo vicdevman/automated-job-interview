@@ -5,7 +5,7 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
 const CONTROL =
-  'w-full rounded-lg border border-line bg-raised px-3 py-2 text-sm text-text ' +
+  'w-full rounded-lg border border-line bg-raised px-3 py-2 sm:text-sm text-text ' +
   'placeholder:text-muted/70 transition-colors duration-150 ' +
   'hover:border-muted/50 focus:border-accent focus:outline-none ' +
   'disabled:cursor-not-allowed disabled:opacity-60';

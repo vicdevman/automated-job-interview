@@ -11,6 +11,13 @@ import {
 import { sttFactory } from '@/lib/providers/registry.client';
 import type { SttSession } from '@/lib/providers/stt/types';
 import { analyseFillers, countWords, wordsPerMinute } from './scoring';
+import {
+  EXTRA_GRACE_MS,
+  MIN_ANSWER_MS,
+  MIN_ANSWER_WORDS,
+  PROVIDER_SILENCE_SEC,
+  STT_MAX_DELAY_SEC,
+} from './turn-timing';
 
 /**
  * PRD §6 — the client half of the turn machine.
@@ -108,6 +115,8 @@ export function useInterview(opts: Options) {
     questionSpokenAt: null as number | null,
     answerStartedAt: null as number | null,
   });
+  /** Pending auto-submit during the post-end-of-turn grace window. */
+  const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submittingRef = useRef(false);
   const startedRef = useRef(false);
   const teardownRef = useRef(false);
@@ -115,6 +124,18 @@ export function useInterview(opts: Options) {
   const setPhase = useCallback((next: InterviewState) => {
     stateRef.current = next;
     setState(next);
+  }, []);
+
+  /**
+   * Cancels a pending auto-submit. Called whenever new speech arrives, when a
+   * turn ends by any other route, and on teardown — so the grace window can
+   * never fire into a turn it no longer belongs to.
+   */
+  const cancelGrace = useCallback(() => {
+    if (graceTimerRef.current) {
+      clearTimeout(graceTimerRef.current);
+      graceTimerRef.current = null;
+    }
   }, []);
 
   // ── live feedback (PRD §6.4) ─────────────────────────────────────────────
@@ -212,6 +233,7 @@ export function useInterview(opts: Options) {
 
   const beginListening = useCallback(() => {
     if (teardownRef.current) return;
+    cancelGrace();
     timingsRef.current.questionSpokenAt = Date.now();
     timingsRef.current.answerStartedAt = null;
     finalsRef.current = [];
@@ -247,6 +269,7 @@ export function useInterview(opts: Options) {
       }
 
       submittingRef.current = true;
+      cancelGrace();
       setError(null);
       captureRef.current?.setMuted(true);
       setPhase('thinking');
@@ -348,6 +371,8 @@ export function useInterview(opts: Options) {
               if (timingsRef.current.answerStartedAt === null) {
                 timingsRef.current.answerStartedAt = Date.now();
               }
+              // The candidate is talking again, so they had not finished.
+              cancelGrace();
               partialRef.current = text;
               setPartial(text);
               recomputeMetrics();
@@ -357,6 +382,7 @@ export function useInterview(opts: Options) {
               if (timingsRef.current.answerStartedAt === null) {
                 timingsRef.current.answerStartedAt = Date.now();
               }
+              cancelGrace();
               finalsRef.current = [...finalsRef.current, text];
               partialRef.current = '';
               setFinals(finalsRef.current);
@@ -364,10 +390,28 @@ export function useInterview(opts: Options) {
               recomputeMetrics();
             },
             onEndOfTurn: () => {
-              // PRD §6.3 — the provider's endpointing is the primary signal.
-              if (stateRef.current === 'listening' && finalsRef.current.length > 0) {
-                void submitRef.current();
-              }
+              // PRD §6.3 — the provider's endpointing is the primary signal,
+              // but it is not the only word. Two guards sit in front of it, both
+              // tunable in lib/interview/turn-timing.ts.
+              if (stateRef.current !== 'listening') return;
+              if (finalsRef.current.length === 0) return;
+
+              const spoken = [...finalsRef.current, partialRef.current].join(' ');
+              const words = countWords(spoken);
+              const startedAt = timingsRef.current.answerStartedAt;
+              const elapsed = startedAt ? Date.now() - startedAt : 0;
+
+              // Guard 1: too short to be a real answer. Someone who opens with
+              // "So, um…" and pauses to think is not finished.
+              if (words < MIN_ANSWER_WORDS || elapsed < MIN_ANSWER_MS) return;
+
+              // Guard 2: wait a little longer in case they were only pausing.
+              // Any further speech cancels this via cancelGrace().
+              cancelGrace();
+              graceTimerRef.current = setTimeout(() => {
+                graceTimerRef.current = null;
+                if (stateRef.current === 'listening') void submitRef.current();
+              }, EXTRA_GRACE_MS);
             },
           onError: (e) => console.error('[interview] stt', e),
           onClose: (code) => console.warn('[interview] stt closed', code),
@@ -449,6 +493,7 @@ export function useInterview(opts: Options) {
 
     return () => {
       teardownRef.current = true;
+      if (graceTimerRef.current) clearTimeout(graceTimerRef.current);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       playbackRef.current?.stop();
       void captureRef.current?.stop();

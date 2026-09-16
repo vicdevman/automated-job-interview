@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -13,47 +14,138 @@ const LINKS = [
   { href: '/account', label: 'Your data' },
 ];
 
+/**
+ * Five links plus a name, a theme toggle and a sign-out button do not fit on a
+ * 375px screen, so below `sm` they collapse behind a menu button. The logo and
+ * the theme toggle stay visible at every width because they are the two things
+ * someone reaches for without thinking.
+ */
 export function AppNav({ name, role }: { name: string; role: 'candidate' | 'interviewer' }) {
   const pathname = usePathname();
-  const links = role === 'interviewer' ? [{ href: '/interviewer/sessions', label: 'Sessions' }, ...LINKS] : LINKS;
+  const [open, setOpen] = useState(false);
+
+  const links =
+    role === 'interviewer'
+      ? [{ href: '/interviewer/sessions', label: 'Sessions' }, ...LINKS]
+      : LINKS;
+
+  // Navigating should always close the menu, including on a link to the page
+  // you are already on.
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // An open menu is a modal-ish surface; let Escape dismiss it.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <header className="border-b border-line">
-      <div className="mx-auto flex w-full max-w-5xl items-center gap-6 px-6 py-3.5">
-        <Link href="/dashboard" className="text-sm font-semibold tracking-tight">
-          Interview Simulator
+      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
+        <Link href="/dashboard" className="shrink-0 text-sm font-semibold tracking-tight">
+          {/* The full name is too wide next to a menu button on a small screen. */}
+          <span className="hidden sm:inline">Interview Simulator</span>
+          <span className="sm:hidden">Interview Sim</span>
         </Link>
 
-        <nav className="flex items-center gap-1">
-          {links.map((link) => {
-            const active = pathname === link.href || pathname.startsWith(`${link.href}/`);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'rounded-lg px-3 py-1.5 text-sm transition-colors',
-                  active ? 'bg-raised font-medium text-text' : 'text-muted hover:text-text',
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+        <nav className="hidden items-center gap-1 md:flex">
+          {links.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                'rounded-lg px-3 py-1.5 text-sm transition-colors',
+                isActive(link.href)
+                  ? 'bg-raised font-medium text-text'
+                  : 'text-muted hover:text-text',
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2">
-          <span className="hidden text-sm text-muted sm:inline">{name}</span>
+        <div className="ml-auto flex items-center gap-1 sm:gap-2">
+          <span className="hidden text-sm text-muted lg:inline">{name}</span>
           <ThemeToggle />
           <button
             type="button"
             onClick={() => void signOut({ callbackUrl: '/' })}
-            className="rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:text-text"
+            className="hidden rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:text-text md:block"
           >
             Sign out
           </button>
+
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="app-mobile-menu"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+            className="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-text md:hidden"
+          >
+            {open ? <CloseIcon /> : <MenuIcon />}
+          </button>
         </div>
       </div>
+
+      {open && (
+        <nav
+          id="app-mobile-menu"
+          className="border-t border-line bg-raised md:hidden"
+          aria-label="Main"
+        >
+          <div className="mx-auto w-full max-w-5xl px-4 py-2">
+            {links.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'block rounded-lg px-3 py-2.5 text-sm transition-colors',
+                  isActive(link.href) ? 'font-medium text-accent' : 'text-text',
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="mt-2 flex items-center justify-between border-t border-line px-3 pb-1 pt-3">
+              <span className="truncate text-sm text-muted">{name}</span>
+              <button
+                type="button"
+                onClick={() => void signOut({ callbackUrl: '/' })}
+                className="shrink-0 text-sm text-muted transition-colors hover:text-text"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
+        </nav>
+      )}
     </header>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" />
+    </svg>
   );
 }

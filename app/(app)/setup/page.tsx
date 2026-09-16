@@ -40,7 +40,7 @@ export default async function SetupPage() {
 
   return (
     <>
-      <h1 className="text-[1.75rem] font-semibold tracking-tight">Set up your interview</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Set up your interview</h1>
       <p className="mt-2 text-muted">Four quick things, then we begin.</p>
 
       {error ? (

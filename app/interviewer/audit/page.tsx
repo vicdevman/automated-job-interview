@@ -37,7 +37,7 @@ export default async function AuditPage() {
 
   return (
     <>
-      <h1 className="text-[1.75rem] font-semibold tracking-tight">Audit log</h1>
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Audit log</h1>
       <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
         Every identity reveal, data export and deletion is recorded here. Deletion entries
         deliberately do not name the person deleted — keeping that would defeat the deletion.

@@ -50,6 +50,9 @@ export class SttConnectTimeout extends Error {
  * joining segments yields "Tell  me  about a  time". Collapse runs of
  * whitespace and tighten the space before sentence punctuation.
  */
+const clamp = (value: number, min: number, max: number) =>
+  Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : min;
+
 function tidy(raw: string | undefined): string {
   if (!raw) return '';
   return raw.replace(/\s+/g, ' ').replace(/\s+([,.!?;:])/g, '$1').trim();
@@ -119,10 +122,17 @@ class SpeechmaticsSession implements SttSession {
       transcription_config: {
         language: this.opts.language || 'en',
         operating_point: 'enhanced',
-        max_delay: 0.7,
+        // Clamped to the ranges Speechmatics accepts. Anything outside them is
+        // rejected with an Error frame rather than being quietly ignored.
+        max_delay: clamp(this.opts.maxDelaySec ?? 1, 0.7, 4),
         enable_partials: true,
-        // Provider-side turn detection. PRD §6.3: never hand-roll silence timers.
-        conversation_config: { end_of_utterance_silence_trigger: 0.8 },
+        // Provider-side turn detection. PRD §6.3: never hand-roll silence
+        // timers. The VALUE is the application's choice, not this adapter's —
+        // see lib/interview/turn-timing.ts. Speechmatics caps it at 2s; longer
+        // waits are added on top by the caller.
+        conversation_config: {
+          end_of_utterance_silence_trigger: clamp(this.opts.endOfTurnSilenceSec ?? 2, 0, 2),
+        },
       },
     };
   }

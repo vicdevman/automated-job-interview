@@ -41,6 +41,15 @@ export interface SttConnectOptions {
   wsUrl: string;
   language: string;
   audioSpec?: SttAudioSpec;
+  /**
+   * Seconds of silence after which the provider should report end-of-turn.
+   * The APPLICATION owns this policy; each adapter maps it onto whatever its
+   * vendor calls the equivalent setting, and clamps it to the vendor's range.
+   * See lib/interview/turn-timing.ts.
+   */
+  endOfTurnSilenceSec?: number;
+  /** Seconds the provider may buffer before emitting a confirmed transcript. */
+  maxDelaySec?: number;
   onPartial: (text: string) => void;
   onFinal: (text: string, meta: SttFinalMeta) => void;
   onEndOfTurn: () => void;
