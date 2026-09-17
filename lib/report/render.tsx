@@ -1,4 +1,10 @@
 import 'server-only';
+// Explicit, even though nothing below refers to `React` by name: this file is
+// JSX compiled to React.createElement calls in some execution paths (it broke
+// PDF downloads outright — "ReferenceError: React is not defined" — the
+// moment the classic JSX transform was in play instead of the automatic one).
+// Importing it is the standard, harmless-either-way fix.
+import React from 'react';
 import {
   Document,
   Page,
@@ -27,7 +33,13 @@ const s = StyleSheet.create({
   page: { paddingTop: 48, paddingBottom: 56, paddingHorizontal: 52, fontSize: 10, color: ink, lineHeight: 1.5 },
   eyebrow: { fontSize: 8, color: muted, letterSpacing: 1, textTransform: 'uppercase' },
   h1: { fontSize: 22, marginTop: 6, fontWeight: 'bold' },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' },
+  // Explicit flex-basis on both sides, not just `justifyContent: space-between`
+  // on two auto-sized children — that was the actual bug: a long role title
+  // (e.g. "Senior Backend Engineer — Payments Platform") had nothing capping
+  // its width, so it grew into the score block instead of wrapping under it.
+  headerRow: { flexDirection: 'row', alignItems: 'flex-end' },
+  headerLeft: { flex: 1, paddingRight: 16 },
+  headerRight: { flexShrink: 0, minWidth: 70, alignItems: 'flex-end' },
   score: { fontSize: 34, fontWeight: 'bold' },
   scoreLabel: { fontSize: 8, color: muted, textAlign: 'right' },
   rule: { borderBottomWidth: 1, borderBottomColor: line, marginVertical: 18 },
@@ -96,7 +108,7 @@ export async function renderReport({
     >
       <Page size="A4" style={s.page}>
         <View style={s.headerRow}>
-          <View>
+          <View style={s.headerLeft}>
             <Text style={s.eyebrow}>Mock interview report</Text>
             <Text style={s.h1}>{interview.roleTitle}</Text>
             <Text style={s.mutedText}>
@@ -108,7 +120,7 @@ export async function renderReport({
               {interview.durationSec ? ` · ${Math.round(interview.durationSec / 60)} minutes` : ''}
             </Text>
           </View>
-          <View>
+          <View style={s.headerRight}>
             <Text style={s.score}>{Math.round(interview.overallScore ?? 0)}</Text>
             <Text style={s.scoreLabel}>out of 100</Text>
           </View>

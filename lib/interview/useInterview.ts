@@ -13,6 +13,7 @@ import type { SttSession } from '@/lib/providers/stt/types';
 import { analyseFillers, countWords, wordsPerMinute } from './scoring';
 import {
   EXTRA_GRACE_MS,
+  FALLBACK_SILENCE_MS,
   MIN_ANSWER_WORDS,
   PROVIDER_SILENCE_SEC,
   STT_MAX_DELAY_SEC,
@@ -117,6 +118,8 @@ export function useInterview(opts: Options) {
   });
   /** Pending auto-submit during the post-end-of-turn grace window. */
   const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** The hard backstop — fires regardless of whether the provider ever signals end-of-turn. */
+  const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const submittingRef = useRef(false);
   const startedRef = useRef(false);
   const teardownRef = useRef(false);
@@ -137,6 +140,31 @@ export function useInterview(opts: Options) {
       graceTimerRef.current = null;
     }
   }, []);
+
+  const cancelFallback = useCallback(() => {
+    if (fallbackTimerRef.current) {
+      clearTimeout(fallbackTimerRef.current);
+      fallbackTimerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * (Re)starts the hard backstop timer — see FALLBACK_SILENCE_MS in
+   * turn-timing.ts. Called every time new speech arrives, and once when
+   * listening begins, so it always measures "time since the last word", not
+   * "time since the turn started".
+   */
+  const armFallback = useCallback(() => {
+    cancelFallback();
+    fallbackTimerRef.current = setTimeout(() => {
+      fallbackTimerRef.current = null;
+      if (stateRef.current !== 'listening') return;
+      const spoken = [...finalsRef.current, partialRef.current].join(' ');
+      if (finalsRef.current.length === 0 || countWords(spoken) < MIN_ANSWER_WORDS) return;
+      void submitRef.current();
+    }, FALLBACK_SILENCE_MS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cancelFallback]);
 
   // ── live feedback (PRD §6.4) ─────────────────────────────────────────────
   const recomputeMetrics = useCallback(() => {
@@ -256,6 +284,7 @@ export function useInterview(opts: Options) {
   const beginListening = useCallback(() => {
     if (teardownRef.current) return;
     cancelGrace();
+    armFallback();
     timingsRef.current.questionSpokenAt = Date.now();
     timingsRef.current.answerStartedAt = null;
     finalsRef.current = [];
@@ -265,7 +294,7 @@ export function useInterview(opts: Options) {
     setMetrics({ wordCount: 0, wpm: null, fillerCount: 0 });
     captureRef.current?.setMuted(false);
     setPhase('listening');
-  }, [setPhase]);
+  }, [setPhase, armFallback]);
 
   /** PRD §6.2 — stop the interviewer mid-sentence and start listening. */
   const bargeIn = useCallback(() => {
@@ -297,6 +326,7 @@ export function useInterview(opts: Options) {
       // considered submission, never a mishear.
       if (inputMode === 'voice' && detectRepeatRequest(transcript)) {
         cancelGrace();
+        cancelFallback();
         finalsRef.current = [];
         partialRef.current = '';
         setFinals([]);
@@ -310,6 +340,7 @@ export function useInterview(opts: Options) {
 
       submittingRef.current = true;
       cancelGrace();
+      cancelFallback();
       setError(null);
       captureRef.current?.setMuted(true);
       setPhase('thinking');
@@ -421,6 +452,7 @@ export function useInterview(opts: Options) {
               }
               // The candidate is talking again, so they had not finished.
               cancelGrace();
+              armFallback();
               partialRef.current = text;
               setPartial(text);
               recomputeMetrics();
@@ -431,6 +463,7 @@ export function useInterview(opts: Options) {
                 timingsRef.current.answerStartedAt = Date.now();
               }
               cancelGrace();
+              armFallback();
               finalsRef.current = [...finalsRef.current, text];
               partialRef.current = '';
               setFinals(finalsRef.current);
@@ -540,6 +573,7 @@ export function useInterview(opts: Options) {
     return () => {
       teardownRef.current = true;
       if (graceTimerRef.current) clearTimeout(graceTimerRef.current);
+      if (fallbackTimerRef.current) clearTimeout(fallbackTimerRef.current);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       playbackRef.current?.stop();
       void captureRef.current?.stop();

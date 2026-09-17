@@ -17,9 +17,9 @@ export default function LandingPage() {
     <div className="flex min-h-dvh flex-col relative z-5">
       <HeaderNotch visible={hidden} onReveal={reveal} />
       <header
-        className={`sticky top-0 z-40 border-b border-line/0 bg-surface/80 backdrop-blur-md
-          transition-transform duration-300 ease-out
-          ${hidden ? '-translate-y-full' : 'translate-y-0'}`}
+        className={`sticky top-0 z-40 overflow-hidden border-b bg-surface/80 backdrop-blur-md
+          transition-[max-height] duration-300 ease-out
+          ${hidden ? 'max-h-0 border-transparent' : 'max-h-24 border-line/0'}`}
       >
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
           <span className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight">

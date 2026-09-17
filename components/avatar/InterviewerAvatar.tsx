@@ -117,9 +117,9 @@ export function InterviewerAvatar({
     idle: { rotate: 0, y: 0, browY: 0, pupilX: 0, pupilY: 0 },
     speaking: { rotate: 0, y: 0, browY: -0.5, pupilX: 0, pupilY: 0 },
     // Head tilts ~3°, brows raise slightly.
-    listening: { rotate: 3, y: 0, browY: -2, pupilX: 0, pupilY: 0.5 },
+    listening: { rotate: 0, y: 0, browY: -2, pupilX: 0, pupilY: 0.5 },
     // Eyes glance up-left, brows furrow.
-    thinking: { rotate: -2, y: -1, browY: 1.5, pupilX: -2, pupilY: -2 },
+    thinking: { rotate: 0, y: -1, browY: 1.5, pupilX: -2, pupilY: -2 },
   }[state];
 
   const mouthHeight = blinking ? 2.5 : 2.5 + mouthOpen * 15;

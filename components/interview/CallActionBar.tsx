@@ -41,7 +41,7 @@ export function CallActionBar({
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-      <div className="pointer-events-auto flex items-center gap-5 rounded-full border border-line/70 bg-raised/90 px-5 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:gap-6 sm:px-6">
+      <div className="pointer-events-auto flex items-center gap-5 rounded-full border border-line/70 bg-raised/90 px-2 py-1.5 shadow-[0_8px_30px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:gap-6 sm:px-2">
         {/* keyboard / voice toggle */}
         <CallButton
           onClick={onToggleTyping}
@@ -60,7 +60,7 @@ export function CallActionBar({
           disabled={!primaryUsable}
           label={speaking ? 'Interrupt' : 'Done'}
           tone={listening ? 'accent' : 'neutral'}
-          size="lg"
+          size="sm"
           pulseLevel={listening ? level : 0}
         >
           {listening ? <CheckIcon className="size-6" /> : <MicIcon className="size-5" />}
@@ -127,7 +127,7 @@ function CallButton({
         )}
         <span className="relative">{children}</span>
       </button>
-      <span className="text-[11px] font-medium text-muted">{label}</span>
+      {/* <span className="text-[11px] font-medium text-muted">{label}</span> */}
     </div>
   );
 }

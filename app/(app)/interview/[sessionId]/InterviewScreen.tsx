@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { InterviewerAvatar } from '@/components/avatar/InterviewerAvatar';
 import { CallActionBar } from '@/components/interview/CallActionBar';
+import { ElapsedTimer } from '@/components/interview/ElapsedTimer';
 import { PaceMeter, TurnIndicator } from '@/components/interview/TurnIndicator';
 import { TranscriptPane } from '@/components/interview/TranscriptPane';
 import { Button } from '@/components/ui/Button';
@@ -30,6 +31,8 @@ export function InterviewScreen(props: {
   const [typing, setTyping] = useState(false);
   const [typed, setTyped] = useState('');
   const [confirmExit, setConfirmExit] = useState(false);
+  // Fixed once, at mount — a call timer, not a re-derived value.
+  const callStartedAt = useRef(Date.now()).current;
 
   const interview = useInterview({
     sessionId: props.sessionId,
@@ -76,8 +79,8 @@ export function InterviewScreen(props: {
 
   return (
     <div className="-mx-4 -my-8 flex min-h-[calc(100dvh-53px)] flex-col sm:-my-10 sm:min-h-[calc(100dvh-57px)]">
-      {/* ── thin status rail — a call's status bar, not a page header ───────── */}
-      <div className="flex items-center gap-3 border-b border-line px-4 py-3 sm:gap-4 sm:px-6">
+      {/* ── the call header — sticky, replaces the app header on this screen ── */}
+      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-surface/90 px-4 py-3 backdrop-blur-md sm:gap-4 sm:px-6">
         <TurnIndicator state={interview.state} level={interview.micLevel} />
         {interview.voiceStatus !== 'ready' && (
           <span
@@ -93,8 +96,11 @@ export function InterviewScreen(props: {
         <span className="hidden truncate text-sm text-muted md:inline">
           {props.roleTitle} · {props.level}
         </span>
-        <span className="ml-auto shrink-0 text-sm tabular-nums text-muted">
-          Q{position}/{props.questionCount}
+        <span className="ml-auto flex shrink-0 items-center gap-3 text-sm">
+          <ElapsedTimer startedAt={callStartedAt} />
+          <span className="tabular-nums text-muted">
+            Q{position}/{props.questionCount}
+          </span>
         </span>
       </div>
 

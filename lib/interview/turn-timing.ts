@@ -95,12 +95,33 @@ export const STT_MAX_DELAY_SEC = Math.min(
   Math.max(0.7, envNumber(process.env.NEXT_PUBLIC_STT_MAX_DELAY, 1)),
 );
 
+/**
+ * The hard backstop. Everything above (PROVIDER_SILENCE_SEC, EXTRA_GRACE_MS)
+ * depends on the transcription provider sending its own "you've stopped
+ * talking" event — and that event can simply fail to arrive (a dropped
+ * packet, a provider hiccup, anything). When that happens the candidate was
+ * previously stuck forever with no way forward except the manual "Done
+ * answering" button.
+ *
+ * This timer does not care about that event at all. It is reset every time
+ * new words arrive (partial or final) while you are answering, and if it ever
+ * runs out — meaning NOTHING new has been transcribed for this long, for any
+ * reason — the answer is submitted anyway. It is deliberately set well above
+ * the normal PROVIDER_SILENCE_SEC + EXTRA_GRACE_MS total, so in ordinary
+ * operation it never fires first; it only ever matters when the normal path
+ * has already failed.
+ *
+ * env: NEXT_PUBLIC_FALLBACK_SILENCE_MS
+ */
+export const FALLBACK_SILENCE_MS = envNumber(process.env.NEXT_PUBLIC_FALLBACK_SILENCE_MS, 6000);
+
 /** Everything above, for logging and for the dev harness to display. */
 export const TURN_TIMING = {
   providerSilenceSec: PROVIDER_SILENCE_SEC,
   extraGraceMs: EXTRA_GRACE_MS,
   minAnswerWords: MIN_ANSWER_WORDS,
   sttMaxDelaySec: STT_MAX_DELAY_SEC,
+  fallbackSilenceMs: FALLBACK_SILENCE_MS,
   get totalWaitMs() {
     return PROVIDER_SILENCE_SEC * 1000 + EXTRA_GRACE_MS;
   },

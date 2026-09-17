@@ -71,7 +71,7 @@ export function TurnIndicator({ state, level }: { state: InterviewState; level: 
           <StateIcon state={state} />
         </span>
       </span>
-      <span className="hidden sm:inline">{label}</span>
+      <span className="inline">{label}</span>
     </div>
   );
 }

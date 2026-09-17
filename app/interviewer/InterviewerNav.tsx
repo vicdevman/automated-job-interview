@@ -35,14 +35,18 @@ export function InterviewerNav() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  // Collapsing max-height, not a translateY slide — see the note in AppNav.
+  const headerMaxH = open ? 'max-h-[24rem]' : hidden ? 'max-h-0' : 'max-h-20 sm:max-h-24';
+
   return (
     <>
       <HeaderNotch visible={hidden && !open} onReveal={reveal} />
       <header
         className={cn(
-          'sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md',
-          'transition-transform duration-300 ease-out',
-          hidden && !open ? '-translate-y-full' : 'translate-y-0',
+          'sticky top-0 z-40 overflow-hidden border-b bg-surface/85 backdrop-blur-md',
+          'transition-[max-height] duration-300 ease-out',
+          headerMaxH,
+          hidden && !open ? 'border-transparent' : 'border-line',
         )}
       >
         <div className="relative mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">

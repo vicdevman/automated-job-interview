@@ -26,7 +26,11 @@ const LINKS = [
 export function AppNav({ name, role }: { name: string; role: 'candidate' | 'interviewer' }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { hidden, reveal } = useAutoHideHeader();
+  // "On a call": the interview screen has its own sticky status header (see
+  // InterviewScreen), so the app header defaults to hidden there — whether
+  // scrolled or not — with only the notch showing, same as a real call UI.
+  const isCallRoute = pathname.startsWith('/interview/');
+  const { hidden, reveal } = useAutoHideHeader({ forceHidden: isCallRoute });
 
   const links =
     role === 'interviewer'
@@ -51,14 +55,24 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
+  // A collapsing max-height rather than a translateY slide: translating a
+  // sticky element off-screen still reserves its box in the flow, which left
+  // a dead gap of blank space at the top of every page whenever the header
+  // was "hidden" — the actual bug behind the reported layout mess. Collapsing
+  // the height to 0 makes the space genuinely disappear, so whatever is below
+  // (the interview's own status header, the page content) sits flush at the
+  // top with nothing in between.
+  const headerMaxH = open ? 'max-h-[24rem]' : hidden ? 'max-h-0' : 'max-h-20 sm:max-h-24';
+
   return (
     <>
       <HeaderNotch visible={hidden && !open} onReveal={reveal} />
       <header
         className={cn(
-          'sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md',
-          'transition-transform duration-300 ease-out',
-          hidden && !open ? '-translate-y-full' : 'translate-y-0',
+          'sticky top-0 z-40 overflow-hidden border-b bg-surface/85 backdrop-blur-md',
+          'transition-[max-height] duration-300 ease-out',
+          headerMaxH,
+          hidden && !open ? 'border-transparent' : 'border-line',
         )}
       >
       <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
