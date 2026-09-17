@@ -95,6 +95,21 @@ export function ThinkingDotsIcon({ className = 'size-5' }: IconProps) {
   );
 }
 
+/** Pull-down/pull-up affordance for revealing the app header on the call screen. */
+export function ChevronIcon({ className = 'size-4' }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path
+        d="M6 9l6 6 6-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function FlagIcon({ className = 'size-5' }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">

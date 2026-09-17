@@ -6,8 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Logo } from '@/components/ui/Logo';
-import { HeaderNotch } from '@/components/ui/HeaderNotch';
-import { useAutoHideHeader } from '@/lib/hooks/useAutoHideHeader';
+import { useCallHeader } from '@/lib/hooks/useCallHeader';
 import { cn } from '@/lib/cn';
 
 const LINKS = [
@@ -27,10 +26,10 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   // "On a call": the interview screen has its own sticky status header (see
-  // InterviewScreen), so the app header defaults to hidden there — whether
-  // scrolled or not — with only the notch showing, same as a real call UI.
-  const isCallRoute = pathname.startsWith('/interview/');
-  const { hidden, reveal } = useAutoHideHeader({ forceHidden: isCallRoute });
+  // InterviewScreen), so the app header defaults to hidden there — no notch,
+  // no scroll tricks — and only reappears when the call header's own toggle
+  // is tapped (see CallHeaderProvider).
+  const { isCallRoute, visible: callHeaderVisible } = useCallHeader();
 
   const links =
     role === 'interviewer'
@@ -55,27 +54,29 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
+  // On a call, the app header is collapsed to a fixed, known height (0, or
+  // exactly the bar's own height) rather than an intrinsic/auto one — the
+  // call status bar (InterviewScreen) needs to know precisely how much space
+  // to offset itself by when this header is toggled visible. Everywhere else
+  // the header is just a plain sticky bar, always shown.
+  //
   // A collapsing max-height rather than a translateY slide: translating a
   // sticky element off-screen still reserves its box in the flow, which left
-  // a dead gap of blank space at the top of every page whenever the header
-  // was "hidden" — the actual bug behind the reported layout mess. Collapsing
-  // the height to 0 makes the space genuinely disappear, so whatever is below
-  // (the interview's own status header, the page content) sits flush at the
-  // top with nothing in between.
-  const headerMaxH = open ? 'max-h-[24rem]' : hidden ? 'max-h-0' : 'max-h-20 sm:max-h-24';
+  // a dead gap of blank space at the top of the page — collapsing the height
+  // to 0 makes the space genuinely disappear.
+  const collapsedOnCall = isCallRoute && !callHeaderVisible && !open;
+  const headerMaxH = open ? 'max-h-[28rem]' : collapsedOnCall ? 'max-h-0' : 'max-h-16';
 
   return (
-    <>
-      <HeaderNotch visible={hidden && !open} onReveal={reveal} />
-      <header
-        className={cn(
-          'sticky top-0 z-40 overflow-hidden border-b bg-surface/85 backdrop-blur-md',
-          'transition-[max-height] duration-300 ease-out',
-          headerMaxH,
-          hidden && !open ? 'border-transparent' : 'border-line',
-        )}
-      >
-      <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
+    <header
+      className={cn(
+        'sticky top-0 z-40 overflow-hidden border-b bg-surface/85 backdrop-blur-md',
+        'transition-[max-height] duration-300 ease-out',
+        headerMaxH,
+        collapsedOnCall ? 'border-transparent' : 'border-line',
+      )}
+    >
+      <div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
         <Link href="/dashboard" className="shrink-0 text-sm font-semibold tracking-tight flex min-w-0 items-center gap-2">
           {/* The full name is too wide next to a menu button on a small screen. */}
           <Logo/>
@@ -158,7 +159,6 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
         </nav>
       )}
       </header>
-    </>
   );
 }
 

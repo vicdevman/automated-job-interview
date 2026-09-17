@@ -1,26 +1,15 @@
-'use client';
-
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Logo } from '@/components/ui/Logo';
-import { HeaderNotch } from '@/components/ui/HeaderNotch';
-import { useAutoHideHeader } from '@/lib/hooks/useAutoHideHeader';
 
 /**
  * PRD §11.1 — composed and quiet, one focal point. The landing page makes a
  * single claim (questions grounded in your real CV) and offers one action.
  */
 export default function LandingPage() {
-  const { hidden, reveal } = useAutoHideHeader();
-
   return (
     <div className="flex min-h-dvh flex-col relative z-5">
-      <HeaderNotch visible={hidden} onReveal={reveal} />
-      <header
-        className={`sticky top-0 z-40 overflow-hidden border-b bg-surface/80 backdrop-blur-md
-          transition-[max-height] duration-300 ease-out
-          ${hidden ? 'max-h-0 border-transparent' : 'max-h-24 border-line/0'}`}
-      >
+      <header className="sticky top-0 z-40 border-b border-line bg-surface/80 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-6 sm:py-5">
           <span className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight">
             <Logo />

@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { InterviewerAvatar } from '@/components/avatar/InterviewerAvatar';
 import { CallActionBar } from '@/components/interview/CallActionBar';
+import { ChevronIcon } from '@/components/interview/CallIcons';
 import { ElapsedTimer } from '@/components/interview/ElapsedTimer';
 import { PaceMeter, TurnIndicator } from '@/components/interview/TurnIndicator';
 import { TranscriptPane } from '@/components/interview/TranscriptPane';
 import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/Field';
 import { useInterview, type Question } from '@/lib/interview/useInterview';
+import { useCallHeader } from '@/lib/hooks/useCallHeader';
+import { cn } from '@/lib/cn';
 
 /**
  * PRD §11.3 — the interview screen carries almost no chrome. A thin status
@@ -33,6 +36,9 @@ export function InterviewScreen(props: {
   const [confirmExit, setConfirmExit] = useState(false);
   // Fixed once, at mount — a call timer, not a re-derived value.
   const callStartedAt = useRef(Date.now()).current;
+  // The app header defaults hidden on a call; this toggle (in the call's own
+  // status bar below) is the only way to bring it back — no notch, no scroll.
+  const { visible: appHeaderVisible, toggle: toggleAppHeader } = useCallHeader();
 
   const interview = useInterview({
     sessionId: props.sessionId,
@@ -79,8 +85,17 @@ export function InterviewScreen(props: {
 
   return (
     <div className="-mx-4 -my-8 flex min-h-[calc(100dvh-53px)] flex-col sm:-my-10 sm:min-h-[calc(100dvh-57px)]">
-      {/* ── the call header — sticky, replaces the app header on this screen ── */}
-      <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-surface/90 px-4 py-3 backdrop-blur-md sm:gap-4 sm:px-6">
+      {/* ── the call header — sticky, replaces the app header on this screen.
+          Offset by the app header's own fixed height (top-16) whenever the
+          toggle below has revealed it, so the two never overlap. ── */}
+      <div
+        className={cn(
+          'sticky z-30 flex items-center gap-3 border-b border-line bg-surface/90 px-4 py-4 backdrop-blur-md',
+          'transition-[top] duration-300 ease-out sm:gap-4 sm:px-6',
+          appHeaderVisible ? 'top-16' : 'top-0',
+        )}
+      >
+       
         <TurnIndicator state={interview.state} level={interview.micLevel} />
         {interview.voiceStatus !== 'ready' && (
           <span
@@ -98,10 +113,23 @@ export function InterviewScreen(props: {
         </span>
         <span className="ml-auto flex shrink-0 items-center gap-3 text-sm">
           <ElapsedTimer startedAt={callStartedAt} />
-          <span className="tabular-nums text-muted">
+          <span className="tabular-nums text-muted border-l border-line pl-2">
             Q{position}/{props.questionCount}
           </span>
         </span>
+
+         <button
+          type="button"
+          title="Open or Close Main header"
+          onClick={toggleAppHeader}
+          aria-expanded={appHeaderVisible}
+          aria-label={appHeaderVisible ? 'Hide navigation' : 'Show navigation'}
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-raised hover:text-text"
+        >
+          <ChevronIcon
+            className={cn('size-5 transition-transform duration-200', appHeaderVisible && 'rotate-180')}
+          />
+        </button>
       </div>
 
       {/* ── the interview ─────────────────────────────────────────────────── */}

@@ -6,8 +6,6 @@ import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { Logo } from '@/components/ui/Logo';
-import { HeaderNotch } from '@/components/ui/HeaderNotch';
-import { useAutoHideHeader } from '@/lib/hooks/useAutoHideHeader';
 import { cn } from '@/lib/cn';
 
 const LINKS = [
@@ -20,7 +18,6 @@ const LINKS = [
 export function InterviewerNav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { hidden, reveal } = useAutoHideHeader();
 
   useEffect(() => {
     setOpen(false);
@@ -35,20 +32,18 @@ export function InterviewerNav() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
-  // Collapsing max-height, not a translateY slide — see the note in AppNav.
-  const headerMaxH = open ? 'max-h-[24rem]' : hidden ? 'max-h-0' : 'max-h-20 sm:max-h-24';
+  // Collapsing max-height (only for the mobile dropdown), not a translateY
+  // slide — see the note in AppNav. Always sticky and shown otherwise.
+  const headerMaxH = open ? 'max-h-[24rem]' : 'max-h-20 sm:max-h-24';
 
   return (
-    <>
-      <HeaderNotch visible={hidden && !open} onReveal={reveal} />
-      <header
-        className={cn(
-          'sticky top-0 z-40 overflow-hidden border-b bg-surface/85 backdrop-blur-md',
-          'transition-[max-height] duration-300 ease-out',
-          headerMaxH,
-          hidden && !open ? 'border-transparent' : 'border-line',
-        )}
-      >
+    <header
+      className={cn(
+        'sticky top-0 z-40 overflow-hidden border-b border-line bg-surface/85 backdrop-blur-md',
+        'transition-[max-height] duration-300 ease-out',
+        headerMaxH,
+      )}
+    >
         <div className="relative mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
           <Link
             href="/interviewer/sessions"
@@ -133,6 +128,5 @@ export function InterviewerNav() {
           )}
         </div>
       </header>
-    </>
   );
 }
