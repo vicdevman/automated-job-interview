@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: 'Privacy' };
  */
 export default function PrivacyPage() {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col relative z-5">
       <header className="mx-auto flex w-full max-w-3xl items-center justify-between px-4 py-4 sm:px-6 sm:py-5">
         <Link href="/" className="text-sm font-semibold tracking-tight">
           Interview Simulator

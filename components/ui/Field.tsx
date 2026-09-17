@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 const CONTROL =
   'w-full rounded-lg border border-line bg-raised px-3 py-2 sm:text-sm text-text ' +
   'placeholder:text-muted/70 transition-colors duration-150 ' +
-  'hover:border-muted/50 focus:border-accent focus:outline-none ' +
+  'hover:border-muted/50 focus:border-transparent focus:outline-none ' +
   'disabled:cursor-not-allowed disabled:opacity-60';
 
 interface Common {

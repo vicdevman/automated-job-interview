@@ -235,6 +235,8 @@ export interface EvaluateTurnResponse {
   clarity: number;
   structure: number;
   feedback: string;
+  /** One short spoken line said just before moving on — see prompt for why. */
+  transition: string;
   coveredPoints: string[];
   missedPoints: string[];
   nextQuestion: {
@@ -251,6 +253,7 @@ export const EVALUATE_TURN_SCHEMA = {
     clarity: { type: 'number' },
     structure: { type: 'number' },
     feedback: { type: 'string' },
+    transition: { type: 'string' },
     coveredPoints: { type: 'array', items: { type: 'string' } },
     missedPoints: { type: 'array', items: { type: 'string' } },
     nextQuestion: {
@@ -262,7 +265,15 @@ export const EVALUATE_TURN_SCHEMA = {
       },
     },
   },
-  required: ['relevance', 'clarity', 'structure', 'feedback', 'coveredPoints', 'missedPoints'],
+  required: [
+    'relevance',
+    'clarity',
+    'structure',
+    'feedback',
+    'transition',
+    'coveredPoints',
+    'missedPoints',
+  ],
 } as const;
 
 export interface EvaluateTurnContext {
@@ -280,7 +291,10 @@ export interface EvaluateTurnContext {
 
 export function evaluateTurnPrompt(ctx: EvaluateTurnContext) {
   return {
-    system: `You assess one answer in a mock job interview and give the candidate useful feedback.
+    system: `You are a warm, attentive human interviewer conducting a real spoken
+conversation, not a form-scoring script. You assess one answer and decide what
+happens next, the way an actual interviewer would: naturally, in the flow of
+the conversation.
 
 ${INJECTION_GUARD}
 
@@ -304,6 +318,15 @@ This is speech converted to text, so it will have no punctuation in places,
 occasional wrong words, and repeated words. Judge what the candidate clearly
 meant. Never deduct marks for transcription artefacts.
 
+DO NOT BE A STICKLER
+A real interviewer does not fail someone for stopping a sentence slightly short
+or for a wording that only ALMOST covers a point. If an answer is substantially
+complete and on-topic, treat it as complete — do not chase perfect coverage of
+every expected point. If the candidate said "that's it" / "that's my answer" /
+"I think that covers it" or simply stopped, respect that: they are done, even if
+you personally would have liked more. Never let the desire for a fuller answer
+turn into an interrogation.
+
 BE HONEST
 Do not inflate. A vague answer with no specifics is a 30, not a 65. A strong,
 specific, well-structured answer is a 90. Use the whole range. Most real answers
@@ -313,10 +336,15 @@ FEEDBACK
 Exactly two sentences, addressed to the candidate as "you". The first says what
 worked, the second says the single most valuable thing to change. Be concrete
 and refer to what they actually said. Never use the words "great" or "excellent"
-as filler.
+as filler. This is written feedback for their report — it is not spoken aloud.
 
-coveredPoints / missedPoints: which of the expected points the answer did and
-did not address, quoted from the expected points list.`,
+TRANSITION (spoken aloud, immediately, before whatever comes next)
+One short natural sentence, 3 to 8 words, the way a person bridges from one
+thing to the next in real conversation — "Got it, thanks." / "That's helpful,
+thank you." / "I see, okay." / "Sure, thanks for that." Vary it; never repeat
+the exact same transition twice in a row. Do not summarise or evaluate in it —
+that is what "feedback" is for. It just needs to sound like a person who was
+listening.`,
 
     user: `ROLE: ${ctx.roleTitle} (${ctx.level} level)
 
@@ -334,9 +362,18 @@ ${
   ctx.isFinalQuestion
     ? 'This was the FINAL question. Set "nextQuestion" to null.'
     : ctx.wantFollowUp
-      ? `The candidate left something out, so "nextQuestion" must be a FOLLOW-UP on the
-same competency (${ctx.question.competency}) that probes what they missed. Set
-isFollowUp to true. Keep it under 35 words and conversational.`
+      ? `The candidate left something out. Use your judgment, the way a real
+interviewer would, about whether it is worth a follow-up:
+- If it would feel natural to ask one more thing on the same competency
+  (${ctx.question.competency}) to probe what they missed, set "nextQuestion" to
+  that follow-up, isFollowUp true, under 35 words, phrased conversationally
+  (e.g. "That makes sense — what made you choose that approach specifically?").
+- If the answer felt complete enough that asking again would feel like
+  cross-examining rather than conversing — the candidate clearly wrapped up,
+  moved on, or the gap is minor — set "nextQuestion" to null instead and simply
+  note the gap in "missedPoints". It is fine, and often better, to let the
+  conversation flow to the next planned question rather than drilling every
+  time. Do not force a follow-up just because one is allowed.`
       : `Set "nextQuestion" to null — the next question is already planned${
           ctx.plannedNextQuestion ? ` ("${ctx.plannedNextQuestion}")` : ''
         }.`

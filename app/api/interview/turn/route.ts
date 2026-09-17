@@ -211,6 +211,7 @@ export async function POST(request: Request) {
       scores: stored.scores,
       metrics: stored.metrics,
       feedback: evaluation.feedback,
+      transition: evaluation.transition,
       coveredPoints: evaluation.coveredPoints,
       missedPoints: evaluation.missedPoints,
       difficulty: {

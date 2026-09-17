@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { Logo } from '@/components/ui/Logo';
+import { HeaderNotch } from '@/components/ui/HeaderNotch';
+import { useAutoHideHeader } from '@/lib/hooks/useAutoHideHeader';
 import { cn } from '@/lib/cn';
 
 const LINKS = [
@@ -23,6 +26,7 @@ const LINKS = [
 export function AppNav({ name, role }: { name: string; role: 'candidate' | 'interviewer' }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { hidden, reveal } = useAutoHideHeader();
 
   const links =
     role === 'interviewer'
@@ -48,10 +52,19 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
-    <header className="border-b border-line">
+    <>
+      <HeaderNotch visible={hidden && !open} onReveal={reveal} />
+      <header
+        className={cn(
+          'sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md',
+          'transition-transform duration-300 ease-out',
+          hidden && !open ? '-translate-y-full' : 'translate-y-0',
+        )}
+      >
       <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
-        <Link href="/dashboard" className="shrink-0 text-sm font-semibold tracking-tight">
+        <Link href="/dashboard" className="shrink-0 text-sm font-semibold tracking-tight flex min-w-0 items-center gap-2">
           {/* The full name is too wide next to a menu button on a small screen. */}
+          <Logo/>
           <span className="hidden sm:inline">Interview Simulator</span>
           <span className="sm:hidden">Interview Sim</span>
         </Link>
@@ -130,7 +143,8 @@ export function AppNav({ name, role }: { name: string; role: 'candidate' | 'inte
           </div>
         </nav>
       )}
-    </header>
+      </header>
+    </>
   );
 }
 

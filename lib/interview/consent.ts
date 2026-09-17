@@ -14,7 +14,7 @@ export const CONSENT_COPY = {
   heading: 'Before we start',
   points: [
     'Your microphone is used only while you are answering, and you can stop at any time.',
-    'Your speech is streamed to a transcription service and converted to text. The audio itself is never saved — not by us, not anywhere.',
+    'Your speech is streamed to a transcription service and converted to text. The audio itself is never saved, not by us, not anywhere.',
     'Only the text of your answers is stored, encrypted, so your results can be scored and shown back to you.',
     'Your answers are sent to a language model to be scored. They are not used to train it.',
     'Transcripts are deleted automatically after 90 days, and you can delete everything yourself at any time.',

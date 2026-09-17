@@ -68,24 +68,21 @@ export const PROVIDER_SILENCE_SEC = Math.min(
 export const EXTRA_GRACE_MS = envNumber(process.env.NEXT_PUBLIC_TURN_GRACE_MS, 1500);
 
 /**
- * An automatic end-of-turn is ignored entirely until the answer has at least
- * this many words.
+ * Below this many words, an end-of-turn is treated as noise (a stray "um",
+ * a cough the transcriber heard as a word) rather than a real answer, and is
+ * not auto-submitted.
  *
- * Stops the interview lurching forward when someone opens with "So…" or
- * "Right, um" and then pauses to actually think. The manual "Done answering"
- * button always works regardless of this.
+ * IMPORTANT: this used to be 8, paired with a hard MIN_ANSWER_MS floor, and
+ * together they silently ate the very first EndOfUtterance event on most real
+ * answers — Speechmatics fires it once per pause, so if that first firing was
+ * rejected, nothing else was coming and the candidate was stuck until they hit
+ * "Done answering" by hand. That was a real, reported regression. Keep this
+ * number small — it exists only to filter noise, never to gate a genuine
+ * answer.
  *
  * env: NEXT_PUBLIC_MIN_ANSWER_WORDS
  */
-export const MIN_ANSWER_WORDS = envNumber(process.env.NEXT_PUBLIC_MIN_ANSWER_WORDS, 8);
-
-/**
- * An automatic end-of-turn is also ignored until this many milliseconds have
- * passed since the candidate started speaking.
- *
- * env: NEXT_PUBLIC_MIN_ANSWER_MS
- */
-export const MIN_ANSWER_MS = envNumber(process.env.NEXT_PUBLIC_MIN_ANSWER_MS, 3000);
+export const MIN_ANSWER_WORDS = envNumber(process.env.NEXT_PUBLIC_MIN_ANSWER_WORDS, 2);
 
 /**
  * How long the transcription service may buffer audio before emitting a
@@ -103,7 +100,6 @@ export const TURN_TIMING = {
   providerSilenceSec: PROVIDER_SILENCE_SEC,
   extraGraceMs: EXTRA_GRACE_MS,
   minAnswerWords: MIN_ANSWER_WORDS,
-  minAnswerMs: MIN_ANSWER_MS,
   sttMaxDelaySec: STT_MAX_DELAY_SEC,
   get totalWaitMs() {
     return PROVIDER_SILENCE_SEC * 1000 + EXTRA_GRACE_MS;

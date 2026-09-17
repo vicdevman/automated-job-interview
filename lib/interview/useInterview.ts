@@ -13,11 +13,11 @@ import type { SttSession } from '@/lib/providers/stt/types';
 import { analyseFillers, countWords, wordsPerMinute } from './scoring';
 import {
   EXTRA_GRACE_MS,
-  MIN_ANSWER_MS,
   MIN_ANSWER_WORDS,
   PROVIDER_SILENCE_SEC,
   STT_MAX_DELAY_SEC,
 } from './turn-timing';
+import { detectRepeatRequest, pickRepeatLeadIn } from './conversational';
 
 /**
  * PRD §6 — the client half of the turn machine.
@@ -186,9 +186,27 @@ export function useInterview(opts: Options) {
     [requestAudio],
   );
 
+  /** Plays one TTS response start-to-finish, driving the amplitude tick loop. */
+  const playResponse = useCallback(async (response: Response) => {
+    if (!response.ok) throw new Error('The interviewer could not speak that.');
+    const handle = await playAudioResponse(response);
+    playbackRef.current = handle;
+
+    const tick = () => {
+      if (!handle.playing) return;
+      setAmplitude(handle.amplitude());
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    await handle.finished;
+    playbackRef.current = null;
+    setAmplitude(0);
+  }, []);
+
   // ── the interviewer's turn ───────────────────────────────────────────────
   const speak = useCallback(
-    async (q: Question, nextToPrefetch: Question | null) => {
+    async (q: Question, nextToPrefetch: Question | null, leadIn?: string) => {
       setPhase('speaking');
       captureRef.current?.setMuted(true);
       bargeFramesRef.current = 0;
@@ -199,27 +217,31 @@ export function useInterview(opts: Options) {
       prefetch(nextToPrefetch);
 
       try {
+        // A short natural bridge ("Got it, thanks.") spoken just before the
+        // next question, so the interview sounds like a conversation instead
+        // of silence-then-next-question. It is synthesised fresh rather than
+        // prefetched — it is short, so the extra latency is negligible, and
+        // it is only known once scoring finishes, after the prefetch for the
+        // question itself was already kicked off.
+        if (leadIn && !teardownRef.current && stateRef.current === 'speaking') {
+          try {
+            const leadResponse = await requestAudio(leadIn);
+            if (teardownRef.current) return;
+            if (stateRef.current === 'speaking') await playResponse(leadResponse);
+          } catch (e) {
+            console.error('[interview] transition speech failed', e);
+          }
+        }
+
+        if (teardownRef.current || stateRef.current !== 'speaking') return;
+
         const response = await takeAudio(q);
-        if (teardownRef.current) return;
-
-        if (!response.ok) throw new Error('The interviewer could not speak that question.');
-
-        const handle = await playAudioResponse(response);
-        playbackRef.current = handle;
-
-        const tick = () => {
-          if (!handle.playing) return;
-          setAmplitude(handle.amplitude());
-          rafRef.current = requestAnimationFrame(tick);
-        };
-        rafRef.current = requestAnimationFrame(tick);
-
-        await handle.finished;
+        if (teardownRef.current || stateRef.current !== 'speaking') return;
+        await playResponse(response);
       } catch (e) {
         // A TTS failure must not end the interview — the question is on screen,
         // so the candidate can simply answer it.
         console.error('[interview] speech failed', e);
-      } finally {
         setAmplitude(0);
         playbackRef.current = null;
       }
@@ -228,7 +250,7 @@ export function useInterview(opts: Options) {
       beginListening();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [prefetch, takeAudio, setPhase],
+    [prefetch, takeAudio, requestAudio, playResponse, setPhase],
   );
 
   const beginListening = useCallback(() => {
@@ -265,6 +287,24 @@ export function useInterview(opts: Options) {
 
       if (!transcript) {
         setError('Nothing was captured. Try answering again, or type your answer instead.');
+        return;
+      }
+
+      // "Sorry, could you repeat that?" is not an answer — it is a request to
+      // hear the question again. Catching it here means it costs nothing: no
+      // scoring call, no penalty, the interviewer just says it again like a
+      // real person would. Voice only — a typed answer is a deliberate,
+      // considered submission, never a mishear.
+      if (inputMode === 'voice' && detectRepeatRequest(transcript)) {
+        cancelGrace();
+        finalsRef.current = [];
+        partialRef.current = '';
+        setFinals([]);
+        setPartial('');
+        const upcoming =
+          opts.questions[opts.questions.findIndex((q) => q.id === questionRef.current.id) + 1] ??
+          null;
+        void speak(questionRef.current, upcoming, pickRepeatLeadIn());
         return;
       }
 
@@ -315,7 +355,10 @@ export function useInterview(opts: Options) {
           // The question after this one, so it can be prefetched during the
           // answer we are about to hear.
           const upcoming = opts.questions[opts.questions.findIndex((q) => q.id === next.id) + 1];
-          await speak(next, upcoming ?? null);
+          // A short spoken bridge ("Got it, thanks.") so moving on sounds like
+          // a conversation rather than a hard cut to the next prompt.
+          const transition: string | undefined = body.transition || undefined;
+          await speak(next, upcoming ?? null, transition);
         } else {
           setPhase('finished');
           submittingRef.current = false;
@@ -366,6 +409,11 @@ export function useInterview(opts: Options) {
             wsUrl,
             language: 'en',
             audioSpec: factory.audioSpec,
+            // Previously omitted — the adapter silently fell back to its own
+            // defaults, so the env-configurable values in turn-timing.ts had
+            // no effect on the provider's own silence trigger. Now they do.
+            endOfTurnSilenceSec: PROVIDER_SILENCE_SEC,
+            maxDelaySec: STT_MAX_DELAY_SEC,
             onPartial: (text) => {
               if (stateRef.current !== 'listening') return;
               if (timingsRef.current.answerStartedAt === null) {
@@ -390,23 +438,21 @@ export function useInterview(opts: Options) {
               recomputeMetrics();
             },
             onEndOfTurn: () => {
-              // PRD §6.3 — the provider's endpointing is the primary signal,
-              // but it is not the only word. Two guards sit in front of it, both
-              // tunable in lib/interview/turn-timing.ts.
+              // PRD §6.3 — the provider's endpointing is the primary signal.
+              // It fires ONCE per pause, so this must never hard-reject it: a
+              // rejected firing here previously meant nothing else was coming,
+              // and the candidate was stuck until they clicked "Done
+              // answering" by hand. The only filter is noise (a stray "um"),
+              // never a genuine short answer.
               if (stateRef.current !== 'listening') return;
               if (finalsRef.current.length === 0) return;
 
               const spoken = [...finalsRef.current, partialRef.current].join(' ');
-              const words = countWords(spoken);
-              const startedAt = timingsRef.current.answerStartedAt;
-              const elapsed = startedAt ? Date.now() - startedAt : 0;
+              if (countWords(spoken) < MIN_ANSWER_WORDS) return;
 
-              // Guard 1: too short to be a real answer. Someone who opens with
-              // "So, um…" and pauses to think is not finished.
-              if (words < MIN_ANSWER_WORDS || elapsed < MIN_ANSWER_MS) return;
-
-              // Guard 2: wait a little longer in case they were only pausing.
-              // Any further speech cancels this via cancelGrace().
+              // Grace window: wait a little in case they were only pausing to
+              // think. Any further speech cancels this via cancelGrace(), so
+              // it costs a confident speaker nothing.
               cancelGrace();
               graceTimerRef.current = setTimeout(() => {
                 graceTimerRef.current = null;

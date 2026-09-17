@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { Providers } from '@/components/app/Providers';
@@ -20,14 +19,7 @@ export default async function InterviewerLayout({ children }: { children: React.
   return (
     <Providers>
       <div className="flex min-h-dvh flex-col">
-        <header className="relative border-b border-line">
-          <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 py-3 sm:gap-6 sm:px-6 sm:py-3.5">
-            <Link href="/interviewer/sessions" className="text-sm font-semibold tracking-tight">
-              Interviewer console
-            </Link>
-            <InterviewerNav />
-          </div>
-        </header>
+        <InterviewerNav />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">{children}</main>
       </div>
     </Providers>

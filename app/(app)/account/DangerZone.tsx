@@ -69,7 +69,7 @@ export function DangerZone() {
       <section className="mt-12 border-t border-line pt-10">
         <h2 className="text-lg font-medium">Take a copy</h2>
         <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted">
-          Downloads everything held about you as a JSON file — your documents, the facts extracted
+          Downloads everything held about you as a JSON file, your documents, the facts extracted
           from them, and every interview with its questions, answers and scores, decrypted and
           readable.
         </p>

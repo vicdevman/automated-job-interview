@@ -124,7 +124,7 @@ export function SetupWizard({
           ))}
         </div>
         <p className="mt-3 text-xs text-muted">
-          This is only the starting point — the interview gets harder or easier based on how you
+          This is only the starting point, the interview gets harder or easier based on how you
           answer.
         </p>
       </Step>

@@ -100,6 +100,8 @@ export interface TurnEvaluation {
   clarity: number;
   structure: number;
   feedback: string;
+  /** Short spoken bridge, said aloud before whatever comes next. */
+  transition: string;
   coveredPoints: string[];
   missedPoints: string[];
   followUp: { text: string; competency: string } | null;
@@ -139,6 +141,7 @@ export async function evaluateTurn(ctx: EvaluateTurnContext): Promise<TurnEvalua
     clarity,
     structure,
     feedback: String(raw.feedback ?? '').trim(),
+    transition: String(raw.transition ?? '').trim() || 'Okay, thank you.',
     coveredPoints: asStringArray(raw.coveredPoints),
     missedPoints: asStringArray(raw.missedPoints),
     followUp,

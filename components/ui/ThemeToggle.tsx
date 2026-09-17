@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 type Theme = 'dark' | 'light';
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     const stored = (localStorage.getItem('theme') as Theme | null) ?? 'dark';

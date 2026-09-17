@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: 'Create an account' };
 export default function RegisterPage() {
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Create an account</h1>
+      <h1 className="text-xl font-semibold tracking-tight sm:text-[1.75rem]">Create an account</h1>
       <p className="mt-2 text-sm text-muted">
         You will be able to upload a CV and start an interview straight away.
       </p>

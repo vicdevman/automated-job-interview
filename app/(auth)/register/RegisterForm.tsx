@@ -75,7 +75,7 @@ export function RegisterForm() {
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" loading={pending} className="mt-2">
+      <Button type="submit" size="md" loading={pending} className="mt-2">
         Create account
       </Button>
     </form>

@@ -247,7 +247,7 @@ export function ProfileEditor({
           <div>
             <h2 className="text-lg font-medium">What the interviewer understood</h2>
             <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted">
-              Each of these is traced to a line you actually wrote — hover the quote to see it. Fix
+              Each of these is traced to a line you actually wrote, hover the quote to see it. Fix
               anything wrong and delete anything you would rather not be asked about.
             </p>
           </div>

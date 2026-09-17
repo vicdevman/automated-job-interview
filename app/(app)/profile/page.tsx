@@ -37,7 +37,7 @@ export default async function ProfilePage() {
       <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Your background</h1>
       <p className="mt-2 max-w-2xl leading-relaxed text-muted">
         The interviewer only asks about things it can find in your own words. Add your CV, a link,
-        or just type a summary — then check what it understood before you start.
+        or just type a summary, then check what it understood before you start.
       </p>
 
       {error ? (

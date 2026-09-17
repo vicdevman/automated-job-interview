@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Sign in' };
 export default function LoginPage() {
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight sm:text-[1.75rem]">Sign in</h1>
+      <h1 className="text-xl font-semibold tracking-tight sm:text-[1.75rem]">Sign in</h1>
       <p className="mt-2 text-sm text-muted">Pick up where you left off.</p>
       <div className="mt-8">
         {/* LoginForm reads ?callbackUrl through useSearchParams, which opts the

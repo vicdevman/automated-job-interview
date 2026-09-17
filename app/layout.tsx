@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
-import { Geist } from 'next/font/google';
+import { Instrument_Sans } from 'next/font/google';
 import { ThemeScript } from '@/components/ui/ThemeScript';
 import './globals.css';
+import PixelBlast from '@/components/ui/pixelBlast';
 
-const geist = Geist({
+const geist = Instrument_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-geist',
@@ -34,7 +35,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <ThemeScript />
       </head>
-      <body className="min-h-dvh antialiased">{children}</body>
+      <body className="min-h-dvh antialiased">
+          {/* Interactive Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div style={{ width: '100%', height: '100%', position: 'fixed' }}>
+          <PixelBlast
+            variant="square"
+            pixelSize={1}
+            color="#4f7bff"
+            opacity={0.15}
+            patternScale={2}
+            patternDensity={1}
+            pixelSizeJitter={0}
+            enableRipples={true}
+            rippleSpeed={0.005}
+            rippleThickness={0.12}
+            rippleIntensityScale={1.5}
+            liquid={false}
+            liquidStrength={0.12}
+            liquidRadius={1.2}
+            liquidWobbleSpeed={5}
+            speed={0.5}
+            edgeFade={0.25}
+            transparent
+            className="absolute inset-0"
+          />
+        </div>
+      </div>
+        {children}</body>
     </html>
   );
 }

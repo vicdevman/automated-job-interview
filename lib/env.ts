@@ -35,6 +35,12 @@ const schema = z.object({
   MONGODB_DB: z.string().default('interview_sim'),
   AUTH_SECRET: z.string().min(16, 'AUTH_SECRET must be at least 16 chars'),
   NEXTAUTH_URL: z.string().url().optional(),
+  /**
+   * Auth.js refuses to run behind a host it cannot verify. Vercel sets this
+   * implicitly from its own environment; `next start` locally, Docker, and any
+   * other host do not, and fail with UntrustedHost at sign-in.
+   */
+  AUTH_TRUST_HOST: z.string().optional(),
   ENCRYPTION_KEY: base64Key32,
 
   // ── provider selection: the swap surface (PRD §3.2) ───────────────────

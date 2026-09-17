@@ -48,7 +48,7 @@ export default async function DashboardPage() {
       ) : sessions.length === 0 ? (
         <EmptyState />
       ) : (
-        <ul className="mt-10 px-2 divide-y divide-line border-t border-line">
+        <ul className="mt-10 divide-y divide-line border-t border-line">
           {sessions.map((s) => (
             <SessionRow key={s._id.toHexString()} session={s} />
           ))}
