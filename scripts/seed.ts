@@ -111,6 +111,23 @@ async function main() {
     console.log('   ✓ created:', email);
   }
 
+  console.log('→ seeding the demo candidate account');
+  const demoEmail = env.SEED_DEMO_CANDIDATE_EMAIL;
+  const demoPassword = env.SEED_DEMO_CANDIDATE_PASSWORD;
+  if (!demoEmail || !demoPassword) {
+    console.log('   · skipped — set SEED_DEMO_CANDIDATE_EMAIL and SEED_DEMO_CANDIDATE_PASSWORD');
+  } else if (await findUserByEmail(demoEmail)) {
+    console.log('   · exists:', demoEmail);
+  } else {
+    await createUser({
+      email: demoEmail,
+      name: 'Demo Candidate',
+      passwordHash: await hashPassword(demoPassword),
+      role: 'candidate',
+    });
+    console.log('   ✓ created:', demoEmail);
+  }
+
   console.log('\nSeed complete.');
   process.exit(0);
 }

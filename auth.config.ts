@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from 'next-auth';
+import { roleHome } from '@/lib/auth/roleHome';
 
 /**
  * Edge-safe half of the auth configuration. No database access and no Node-only
@@ -27,8 +28,7 @@ export const authConfig = {
 
       // Signed-in users have no reason to see the auth screens again.
       if (user && (pathname === '/login' || pathname === '/register')) {
-        const home = user.role === 'interviewer' ? '/interviewer/sessions' : '/dashboard';
-        return Response.redirect(new URL(home, request.nextUrl));
+        return Response.redirect(new URL(roleHome(user.role), request.nextUrl));
       }
       return true;
     },

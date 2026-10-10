@@ -82,6 +82,14 @@ const schema = z.object({
   // ── seeding (PRD §1.2: seeded single Interviewer, no public admin signup)
   SEED_INTERVIEWER_EMAIL: z.string().email().optional(),
   SEED_INTERVIEWER_PASSWORD: z.string().optional(),
+
+  /**
+   * A ready-to-sign-in candidate account, seeded purely so the login page can
+   * show working demo credentials. Optional — omit both to seed no demo
+   * candidate and show nothing on the login page.
+   */
+  SEED_DEMO_CANDIDATE_EMAIL: z.string().email().optional(),
+  SEED_DEMO_CANDIDATE_PASSWORD: z.string().optional(),
 });
 
 export type Env = z.infer<typeof schema>;
